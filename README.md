@@ -1,5 +1,5 @@
 # SG-MRT-Routefinder
-This is JS Practice on how to find shortest route between stations spread out on 3 partial and intersecting SG MRT lines
+This is a JS Practice on how to find shortest route between stations spread out on 3 partial and intersecting SG MRT lines
 
 ## List of stations
 Red line
