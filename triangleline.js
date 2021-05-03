@@ -167,132 +167,101 @@ function findRoute(startStn, endStn) {
     if (startStnObj === endStnObj) {
         console.log('Start and End station are the same')
     } else {
-        routeMainRecord = []
-        routeFinder(startStnObj, endStnObj, [],[],'')
-        console.log(routeMainRecord)
+        console.log(`Finding the shortest route between ${startStnObj.name[0]} and ${endStnObj.name[0]}`)
+                routeMainRecord = []
+        routeFinder(startStnObj, endStnObj, [],'',0,'')
+        console.log('Shortest route found:')
+        console.log(shortestRoute(routeMainRecord))
+        console.log(' ')
     }
 }
 
-function routeFinder(currentStn, endStn, routeRecord, turnCount, prevStn) {
-    console.log(' ')
-    console.log("new routeFinder call")
-    console.log('start > '+currentStn.name[1])
-    console.log('end > '+endStn.name[1])
-    console.log('prev > '+prevStn)
+function shortestRoute(routeArray){
+    let shortest = routeArray[0]
+    routeArray.forEach(function(ele){
+        if (ele.length <= shortest.length) {
+            shortest = ele
+        }
+    })
+    return shortest
+}
 
-    let currentRoute = routeRecord
-    currentRoute.push(currentStn.name[0])
-    console.log(' ')
-    console.log('routeRecord')
-    console.log(currentRoute)
+function routeFinder(currentStn, endStn, routeRecord,routeStr,turnCount, prevStn) {
+    routeRecord.push(currentStn.name[0])
+    routeStr += currentStn.name[0]
+    routeStr += '-->'
 
     let currentStnType = currentStn.stnType
     let searchArray = []
 
-    console.log(' ')
-    console.log('search array')
     if (prevStn===''){
         searchArray.push(0,1)
-        console.log(searchArray)
     } else {
-        console.log(currentStn.frontBack)
-        console.log(prevStn)
         searchArray.push(1 - currentStn.frontBack.findIndex(function(stn){
             return stn === prevStn
         }))
-        console.log(searchArray)
     }
 
     if (currentStnType === 'Line') {
-        console.log('Line Search Loop')
         searchArray.forEach(function(dir){
-            console.log(dir)
             let nextStn = stations[currentStn.frontBack[dir]]
-            console.log(nextStn)
-            console.log('Next Station > '+nextStn.name[1])
             if (nextStn === endStn) {
-                console.log('###END STATION FOUND###')
-                currentRoute.push(nextStn.name[0])
-                console.log(currentRoute)
-                routeMainRecord.push(currentRoute)
-                console.log(routeMainRecord)
-                currentRoute = []
-                console.log('routeRecord cleared')
+                routeRecord.push(nextStn.name[0])
+                routeStr += nextStn.name[0]
+                routeMainRecord.push(routeStr)
             } else {
-                routeFinder(nextStn,endStn,currentRoute,turnCount,currentStn.name[1])
+                routeFinder(nextStn,endStn,routeRecord,routeStr,turnCount,currentStn.name[1])
             }
         })
     } else if (currentStnType==='Interchange') {
-        console.log('Interchange Search Loop')
+
         searchArray.forEach(function(dir) {
             let nextStn = stations[currentStn.frontBack[dir]]
-            console.log(currentStn)
-            console.log(nextStn)
-            console.log('Next Station > ' + nextStn.name[1])
             if (nextStn === endStn) {
-                console.log('end station found')
-                currentRoute.push(nextStn.name[0])
-                console.log(currentRoute)
-                routeMainRecord.push(currentRoute)
-                console.log(routeMainRecord)
-                currentRoute = []
-                console.log('routeRecord cleared')
+                routeRecord.push(nextStn.name[0])
+                routeStr += nextStn.name[0]
+                routeMainRecord.push(routeStr)
             } else {
-                routeFinder(nextStn, endStn, currentRoute, turnCount, currentStn.name[1])
+                routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.name[1])
             }
         })
 
         if (turnCount<=1) {
-            console.log('Interchange left right Search Loop')
-            console.log('current > '+currentStn.name[1])
-            console.log(currentStn.leftRight)
             currentStn.leftRight.forEach(function (stn) {
-                console.log(stn)
                 let nextStn = stations[stn]
-                console.log(nextStn)
-                console.log('Next Station > ' + nextStn.name[1])
                 if (nextStn === endStn) {
-                    console.log('end station found')
-                    currentRoute.push(nextStn.name[0])
-                    console.log(currentRoute)
-                    routeMainRecord.push(currentRoute)
-                    console.log(routeMainRecord)
-                    currentRoute = []
-                    console.log('routeRecord cleared')
+                    routeRecord.push(nextStn.name[0])
+                    // routeStr += "Change line-->"
+                    routeStr += nextStn.name[0]
+                    routeMainRecord.push(routeStr)
                 } else {
                     turnCount++
-                    routeFinder(nextStn, endStn, currentRoute, turnCount, currentStn.turnName)
+                    routeStr += "Change line-->"
+                    routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.turnName)
                 }
 
             })
         }
     } else if (currentStnType==='Terminal') {
-        console.log('Terminal Search Loop')
         if (prevStn==='') {
             let nextStn = stations[currentStn.frontBack[0]]
             if (nextStn === endStn) {
-                console.log('end station found')
-                currentRoute.push(nextStn.name[0])
-                console.log(currentRoute)
-                routeMainRecord.push(currentRoute)
-                console.log(routeMainRecord)
-                currentRoute = []
-                console.log('routeRecord cleared')
+                routeRecord.push(nextStn.name[0])
+                routeStr += nextStn.name[0]
+                routeMainRecord.push(routeStr)
                 return
             } else {
-                routeFinder(nextStn, endStn, currentRoute, turnCount, currentStn.name[1])
+                routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.name[1])
             }
         }
-        console.log('Terminal Station Reached')
         currentRoute = []
-        console.log('routeRecord cleared')
     }
 }
 
-// findRoute('novenaR','braddellR')
-// findRoute('tanKahKeeD','angMoKioR')
-// findRoute('littleIndiaD','farrerRoadC')
-// findRoute('orchardR','lorongChuanC')
+findRoute('novenaR','braddellR')
+findRoute('tanKahKeeD','angMoKioR')
+findRoute('littleIndiaD','farrerRoadC')
+findRoute('orchardR','lorongChuanC')
 findRoute('farrerRoadC','orchardR')
 
 
