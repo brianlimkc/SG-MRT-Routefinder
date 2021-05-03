@@ -2,7 +2,7 @@
 This is JS Practice on how to find shortest route between stations spread out on 3 partial and intersecting SG MRT lines
 
 ## List of stations
-###Red line
+Red line
 1. Yio Chu Kang
 2. Ang Mo Kio
 3. Bishan (Interchange)
@@ -13,7 +13,7 @@ This is JS Practice on how to find shortest route between stations spread out on
 8. Orchard
 9. Somerset
 
-###Circle Line
+Circle Line
 1. Serangoon
 2. Lorong Chuan
 3. Bishan (Interchange)
@@ -23,7 +23,7 @@ This is JS Practice on how to find shortest route between stations spread out on
 7. Farrer Road
 8. Holland Village
 
-###Downtown Line
+Downtown Line
 1. Sixth Avenue
 2. Tah Kah Kee
 3. Botanic Gardens (Interchange)
