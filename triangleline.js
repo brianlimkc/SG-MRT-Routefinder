@@ -161,22 +161,22 @@ let stations = {
 
 let routeMainRecord = []
 
-function findRoute(startStn, endStn) {
+function findRoute(startStn, endStn) { //parent of the search function
     let startStnObj = stations[startStn]
     let endStnObj = stations[endStn]
-    if (startStnObj === endStnObj) {
+    if (startStnObj === endStnObj) { // basic check to see whether the start and end station are the same
         console.log('Start and End station are the same')
     } else {
         console.log(`Finding the shortest route between ${startStnObj.name[0]} and ${endStnObj.name[0]}`)
-                routeMainRecord = []
-        routeFinder(startStnObj, endStnObj, [],'',0,'')
+                routeMainRecord = [] // array to store the solutions found
+        routeFinder(startStnObj, endStnObj, [],'',0,'') // recursive array to search through the network to find working routes and stores it in routeMainArray
         console.log('Shortest route found:')
-        console.log(shortestRoute(routeMainRecord))
+        console.log(shortestRoute(routeMainRecord)) // to print the shortest route found
         console.log(' ')
     }
 }
 
-function shortestRoute(routeArray){
+function shortestRoute(routeArray){ // array which returns the shortest route
     let shortest = routeArray[0]
     routeArray.forEach(function(ele){
         if (ele.length <= shortest.length) {
@@ -187,78 +187,77 @@ function shortestRoute(routeArray){
 }
 
 function routeFinder(currentStn, endStn, routeRecord,routeStr,turnCount, prevStn) {
-    routeRecord.push(currentStn.name[0])
-    routeStr += currentStn.name[0]
-    routeStr += '-->'
+    routeRecord.push(currentStn.name[0]) // to record the entire search path, useful for debug purposes
+    routeStr += currentStn.name[0] // adds the current route to a string
+    routeStr += '-->' // adds a divider
 
-    let currentStnType = currentStn.stnType
-    let searchArray = []
+    let currentStnType = currentStn.stnType // to retrieve the station type, which would decide which search pattern to use later on
+    let searchArray = [] // array to store which stations will be searched next along front and back axis
 
-    if (prevStn===''){
+    if (prevStn===''){ // if no previous station (ie function is called for the first time, both front and back stations will be called
         searchArray.push(0,1)
     } else {
-        searchArray.push(1 - currentStn.frontBack.findIndex(function(stn){
+        searchArray.push(1 - currentStn.frontBack.findIndex(function(stn){ // by using the previous station to define the next station to be called
             return stn === prevStn
-        }))
+        })) // array stores the index of the next station along front and back to be called
     }
 
-    if (currentStnType === 'Line') {
+    if (currentStnType === 'Line') { // search pattern if station is a line
         searchArray.forEach(function(dir){
-            let nextStn = stations[currentStn.frontBack[dir]]
-            if (nextStn === endStn) {
+            let nextStn = stations[currentStn.frontBack[dir]] // calling the obj for the next station
+            if (nextStn === endStn) { //if the end station has been found, logs the end station to routeRecord, logs routeRecord to routeMainRecord and exits
                 routeRecord.push(nextStn.name[0])
                 routeStr += nextStn.name[0]
                 routeMainRecord.push(routeStr)
             } else {
-                routeFinder(nextStn,endStn,routeRecord,routeStr,turnCount,currentStn.name[1])
+                routeFinder(nextStn,endStn,routeRecord,routeStr,turnCount,currentStn.name[1]) // calls the recursive function on the next station
             }
         })
-    } else if (currentStnType==='Interchange') {
-
+    } else if (currentStnType==='Interchange') { // search pattern if station is an interchange
         searchArray.forEach(function(dir) {
-            let nextStn = stations[currentStn.frontBack[dir]]
-            if (nextStn === endStn) {
+            let nextStn = stations[currentStn.frontBack[dir]] // calling the obj for the next station
+            if (nextStn === endStn) { //if the end station has been found, logs the end station to routeRecord, logs routeRecord to routeMainRecord and exits
                 routeRecord.push(nextStn.name[0])
                 routeStr += nextStn.name[0]
                 routeMainRecord.push(routeStr)
             } else {
-                routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.name[1])
+                routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.name[1]) // calls the recursive function on the next station
             }
         })
 
-        if (turnCount<=1) {
-            currentStn.leftRight.forEach(function (stn) {
-                let nextStn = stations[stn]
-                if (nextStn === endStn) {
+        if (turnCount<=1) { // checking if the number of turns is 1 or below. if 2 turns have already been made, skips checking of left and right stations
+            currentStn.leftRight.forEach(function (stn) { //checks both left and right stations
+                let nextStn = stations[stn] // calling the obj for the next station
+                if (nextStn === endStn) {  //if the end station has been found, logs the end station to routeRecord, logs routeRecord to routeMainRecord and exits
                     routeRecord.push(nextStn.name[0])
                     // routeStr += "Change line-->"
                     routeStr += nextStn.name[0]
                     routeMainRecord.push(routeStr)
                 } else {
-                    turnCount++
-                    routeStr += "Change line-->"
-                    routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.turnName)
+                    turnCount++ // increments turn count
+                    routeStr += "Change line-->" // inserts change line into the route string
+                    routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.turnName) // calls the recursive function on the next station
                 }
 
             })
         }
-    } else if (currentStnType==='Terminal') {
-        if (prevStn==='') {
-            let nextStn = stations[currentStn.frontBack[0]]
-            if (nextStn === endStn) {
+    } else if (currentStnType==='Terminal') { // search pattern if station is an interchange
+        if (prevStn==='') { // if search starts on a terminal station
+            let nextStn = stations[currentStn.frontBack[0]] // next station will be the only neighbouring station
+            if (nextStn === endStn) { //if the end station has been found, logs the end station to routeRecord, logs routeRecord to routeMainRecord and exits
                 routeRecord.push(nextStn.name[0])
                 routeStr += nextStn.name[0]
                 routeMainRecord.push(routeStr)
                 return
             } else {
-                routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.name[1])
+                routeFinder(nextStn, endStn, routeRecord, routeStr, turnCount, currentStn.name[1]) // calls the recursive function on the next station
             }
         }
         currentRoute = []
     }
 }
-
-findRoute('novenaR','braddellR')
+findRoute('novenaR','novenaR')
+findRoute('yioChuKangR','somersetR')
 findRoute('tanKahKeeD','angMoKioR')
 findRoute('littleIndiaD','farrerRoadC')
 findRoute('orchardR','lorongChuanC')
